@@ -1,6 +1,41 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import Image from "next/image";
+
+const API_KEY = "b191ad205317927c1b95e4ad22c7f87c";
+const BASE_URL = "https://api.themoviedb.org/3";
+const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
+const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
+const FALLBACK_POSTER = "/movie/wickedCard.svg";
+const FALLBACK_HERO = "/movie/wickedHero.svg";
+
+interface CrewMember {
+  name: string;
+  job: string;
+}
+
+interface CastMember {
+  name: string;
+}
+
+interface TmdbMovieResponse {
+  title: string;
+  release_date: string;
+  runtime: number;
+  vote_average: number;
+  vote_count: number;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  genres: { id: number; name: string }[];
+  overview: string;
+  credits?: {
+    cast: CastMember[];
+    crew: CrewMember[];
+  };
+}
 
 export interface MovieData {
   title: string;
@@ -18,28 +53,86 @@ export interface MovieData {
   stars: string[];
 }
 
-const mockMovie: MovieData = {
-  title: "Wicked",
-  releaseDate: "2024.11.26",
-  ageRating: "PG",
-  duration: "2h 40m",
-  rating: 6.9,
-  ratingCount: "37k",
-  posterImage: "/movie/wickedCard.svg",
-  heroImage: "/movie/wickedHero.svg",
-  genres: ["Fairy Tale", "Pop Musical", "Fantasy", "Musical", "Romance"],
-  description:
-    "Elphaba, a misunderstood young woman because of her green skin, and Glinda, a popular girl, become friends at Shiz University in the Land of Oz. After an encounter with the Wonderful Wizard of Oz, their friendship reaches a crossroads.",
-  director: "Jon M. Chu",
-  writers: ["Winnie Holzman", "Dana Fox", "Gregory Maguire"],
-  stars: ["Cynthia Erivo", "Ariana Grande", "Jeff Goldblum"],
-};
-
-interface MovieDesProps {
-  movie?: MovieData;
+function formatRuntime(minutes: number) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${m}m`;
 }
 
-export function MovieDes({ movie = mockMovie }: MovieDesProps) {
+function formatRatingCount(count: number) {
+  if (count >= 1000) return `${Math.round(count / 1000)}k`;
+  return `${count}`;
+}
+
+function mapTmdbToMovieData(data: TmdbMovieResponse): MovieData {
+  const crew = data.credits?.crew || [];
+  const cast = data.credits?.cast || [];
+
+  const director = crew.find((c) => c.job === "Director")?.name || "Unknown";
+  const writers = crew
+    .filter(
+      (c) => c.job === "Screenplay" || c.job === "Writer" || c.job === "Novel",
+    )
+    .map((c) => c.name)
+    .filter((name, i, arr) => arr.indexOf(name) === i) // давхардлыг арилгах
+    .slice(0, 3);
+  const stars = cast.slice(0, 3).map((c) => c.name);
+
+  return {
+    title: data.title,
+    releaseDate: data.release_date?.replace(/-/g, ".") || "N/A",
+    ageRating: "PG", // TMDB нь энэ мэдээллийг үндсэн endpoint-оор өгдөггүй
+    duration: data.runtime ? formatRuntime(data.runtime) : "N/A",
+    rating: data.vote_average ?? 0,
+    ratingCount: formatRatingCount(data.vote_count ?? 0),
+    posterImage: data.poster_path
+      ? `${POSTER_BASE_URL}${data.poster_path}`
+      : FALLBACK_POSTER,
+    heroImage: data.backdrop_path
+      ? `${IMAGE_BASE_URL}${data.backdrop_path}`
+      : FALLBACK_HERO,
+    genres: data.genres?.map((g) => g.name) || [],
+    description: data.overview || "",
+    director,
+    writers: writers.length ? writers : ["Unknown"],
+    stars: stars.length ? stars : ["Unknown"],
+  };
+}
+
+interface MovieDesProps {
+  movieId: number;
+}
+
+export function MovieDes({ movieId }: MovieDesProps) {
+  const [movie, setMovie] = useState<MovieData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMovie = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `${BASE_URL}/movie/${movieId}?language=en-US&append_to_response=credits&api_key=${API_KEY}`,
+        );
+        const data = await res.json();
+        setMovie(mapTmdbToMovieData(data));
+      } catch (err) {
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMovie();
+  }, [movieId]);
+
+  if (loading || !movie) {
+    return (
+      <div className="w-[1080px] mx-auto mt-[52px]">
+        <p className="text-sm text-gray-500">Loading movie details...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-[1080px] mx-auto mt-[52px]">
       <div className="flex justify-between items-start">
@@ -53,7 +146,7 @@ export function MovieDes({ movie = mockMovie }: MovieDesProps) {
           <div className="text-sm text-gray-500">Rating</div>
           <div className="flex items-center gap-1 justify-end">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-bold">{movie.rating}</span>
+            <span className="font-bold">{movie.rating.toFixed(1)}</span>
             <span className="text-gray-400 text-sm">/10</span>
           </div>
           <div className="text-xs text-gray-400">{movie.ratingCount}</div>
