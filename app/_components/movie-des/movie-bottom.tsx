@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronRight, Star } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { useParams } from "next/navigation";
+import { Card } from "../card"; // Card компонентын замаа тохируулаарай
 
 interface Movie {
   id: number;
@@ -15,7 +15,6 @@ interface Movie {
 
 const API_KEY = "b191ad205317927c1b95e4ad22c7f87c";
 const BASE_URL = "https://api.themoviedb.org/3";
-const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 export function MovieBottom() {
   const params = useParams();
@@ -59,7 +58,7 @@ export function MovieBottom() {
         <p className="text-2xl font-bold">More like this</p>
         <Link
           href={`/movie/${movieId}/similar`}
-          className="flex items-center gap-1 text-sm text-gray-600 hover:text-black"
+          className="flex items-center gap-1 text-sm text-gray-600 hover:text-black font-medium"
         >
           <span>See more</span>
           <ChevronRight className="w-4 h-4" />
@@ -67,36 +66,7 @@ export function MovieBottom() {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {movies.map((movie) => (
-          <Link
-            key={movie.id}
-            href={`/movie/${movie.id}`}
-            className="flex flex-col overflow-hidden rounded-lg border border-gray-100 cursor-pointer group"
-          >
-            <div className="relative w-full aspect-[2/3] overflow-hidden">
-              <Image
-                src={
-                  movie.poster_path
-                    ? `${IMAGE_BASE_URL}${movie.poster_path}`
-                    : "/moviecard/placeholder.svg"
-                }
-                alt={movie.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <div className="flex flex-col gap-1 bg-gray-200 p-3">
-              <div className="flex items-center gap-1 text-sm">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold">
-                  {movie.vote_average.toFixed(1)}
-                </span>
-                <span className="text-gray-500">/10</span>
-              </div>
-              <p className="text-sm font-medium leading-snug line-clamp-2">
-                {movie.title}
-              </p>
-            </div>
-          </Link>
+          <Card key={movie.id} movie={movie} />
         ))}
       </div>
     </div>

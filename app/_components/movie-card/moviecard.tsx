@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { Card } from "../card";
+import { Card } from "../card"; // эсвэл таны Card байгаа замаар тохируулаарай
 
 interface Movie {
   id: number;
@@ -22,7 +22,11 @@ const GENRE_PATH_MAP: Record<string, string> = {
 
 export function Moviecard({ movies, genre }: MoviecardProps) {
   if (!movies || movies.length === 0) {
-    return <p className="text-sm text-gray-500">Loading movies...</p>;
+    return (
+      <div className="py-10 text-center text-sm text-gray-500">
+        Loading movies...
+      </div>
+    );
   }
 
   const href = genre && GENRE_PATH_MAP[genre] ? GENRE_PATH_MAP[genre] : "/";
@@ -33,7 +37,7 @@ export function Moviecard({ movies, genre }: MoviecardProps) {
         <p className="text-2xl font-bold">{genre}</p>
         <Link
           href={href}
-          className="flex items-center gap-1 text-sm text-gray-600 hover:text-black"
+          className="flex items-center gap-1 text-sm text-gray-600 hover:text-black font-medium"
         >
           <span>See more</span>
           <ChevronRight className="w-4 h-4" />

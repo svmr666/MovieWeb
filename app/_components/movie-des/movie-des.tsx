@@ -9,8 +9,9 @@ const API_KEY = "b191ad205317927c1b95e4ad22c7f87c";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
 const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
-const FALLBACK_POSTER = "/movie/wickedCard.svg";
-const FALLBACK_HERO = "/movie/wickedHero.svg";
+
+// Нийтлэг "Зураг олдсонгүй" SVG placeholder (Inline Data URI)
+const NO_IMAGE_PLACEHOLDER = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="750" viewBox="0 0 500 750" fill="%23f3f4f6"><rect width="100%" height="100%" fill="%23e5e7eb"/><g transform="translate(175, 275)" stroke="%239ca3af" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="0" y="0" width="150" height="150" rx="12"/><circle cx="45" cy="45" r="15"/><path d="m150 105-40-40-70 70"/></g><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="600" fill="%236b7280">Image Not Found</text></svg>`;
 
 interface CrewMember {
   name: string;
@@ -74,23 +75,23 @@ function mapTmdbToMovieData(data: TmdbMovieResponse): MovieData {
       (c) => c.job === "Screenplay" || c.job === "Writer" || c.job === "Novel",
     )
     .map((c) => c.name)
-    .filter((name, i, arr) => arr.indexOf(name) === i) // давхардлыг арилгах
+    .filter((name, i, arr) => arr.indexOf(name) === i)
     .slice(0, 3);
   const stars = cast.slice(0, 3).map((c) => c.name);
 
   return {
     title: data.title,
     releaseDate: data.release_date?.replace(/-/g, ".") || "N/A",
-    ageRating: "PG", // TMDB нь энэ мэдээллийг үндсэн endpoint-оор өгдөггүй
+    ageRating: "PG",
     duration: data.runtime ? formatRuntime(data.runtime) : "N/A",
     rating: data.vote_average ?? 0,
     ratingCount: formatRatingCount(data.vote_count ?? 0),
     posterImage: data.poster_path
       ? `${POSTER_BASE_URL}${data.poster_path}`
-      : FALLBACK_POSTER,
+      : NO_IMAGE_PLACEHOLDER,
     heroImage: data.backdrop_path
       ? `${IMAGE_BASE_URL}${data.backdrop_path}`
-      : FALLBACK_HERO,
+      : NO_IMAGE_PLACEHOLDER,
     genres: data.genres?.map((g) => g.name) || [],
     description: data.overview || "",
     director,
@@ -107,6 +108,10 @@ export function MovieDes({ movieId }: MovieDesProps) {
   const [movie, setMovie] = useState<MovieData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Зураг ачаалахад алдаа гаргах үеийн state
+  const [posterSrc, setPosterSrc] = useState<string>(NO_IMAGE_PLACEHOLDER);
+  const [heroSrc, setHeroSrc] = useState<string>(NO_IMAGE_PLACEHOLDER);
+
   useEffect(() => {
     const fetchMovie = async () => {
       setLoading(true);
@@ -115,7 +120,11 @@ export function MovieDes({ movieId }: MovieDesProps) {
           `${BASE_URL}/movie/${movieId}?language=en-US&append_to_response=credits&api_key=${API_KEY}`,
         );
         const data = await res.json();
-        setMovie(mapTmdbToMovieData(data));
+        const mappedData = mapTmdbToMovieData(data);
+
+        setMovie(mappedData);
+        setPosterSrc(mappedData.posterImage);
+        setHeroSrc(mappedData.heroImage);
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
@@ -155,18 +164,20 @@ export function MovieDes({ movieId }: MovieDesProps) {
 
       <div className="flex gap-[32px] mt-6">
         <Image
-          src={movie.posterImage}
+          src={posterSrc}
           alt={movie.title}
           width={290}
           height={428}
-          className="w-[290px] h-[428px] rounded-md object-cover"
+          className="w-[290px] h-[428px] rounded-md object-cover bg-gray-100"
+          onError={() => setPosterSrc(NO_IMAGE_PLACEHOLDER)}
         />
         <Image
-          src={movie.heroImage}
+          src={heroSrc}
           alt={`${movie.title} hero`}
           width={760}
           height={428}
-          className="w-[760px] h-[428px] rounded-md object-cover"
+          className="w-[760px] h-[428px] rounded-md object-cover bg-gray-100"
+          onError={() => setHeroSrc(NO_IMAGE_PLACEHOLDER)}
         />
       </div>
 
