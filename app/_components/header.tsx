@@ -43,7 +43,6 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Genre жагсаалт татах
   useEffect(() => {
     const fetchGenres = async () => {
       try {
@@ -59,7 +58,6 @@ export function Header() {
     fetchGenres();
   }, []);
 
-  // Real-time Search debounce логик
   useEffect(() => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -85,7 +83,6 @@ export function Header() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Гадна талд дарахад хайлтын цонхыг хаах
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -99,7 +96,6 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Enter дарахад хайлтын хуудас руу шилжих
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && query.trim()) {
       setIsOpen(false);
@@ -128,7 +124,6 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3 justify-center flex-1 max-w-2xl">
-          {/* Genre Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
@@ -161,8 +156,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Real-time Search Box */}
-          <div className="relative w-full max-w-md" ref={searchRef}>
+          <div className="relative  max-w-md w-[379px]" ref={searchRef}>
             <InputGroup className="w-full rounded-lg">
               <InputGroupAddon>
                 <Search className="w-4 h-4 text-gray-500" />
@@ -176,7 +170,6 @@ export function Header() {
               />
             </InputGroup>
 
-            {/* Dropdown Search Results (Зураг 1 шиг харагдана) */}
             {isOpen && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-background border rounded-xl shadow-2xl p-3 z-50 flex flex-col gap-2">
                 {searchResults.length > 0 ? (
