@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Footer } from "../_components/footer";
-import { Header } from "../_components/header";
-import { Card } from "../_components/card";
+import { useParams } from "next/navigation";
+import { Footer } from "../../../_components/footer";
+import { Header } from "../../../_components/header";
+import { Card } from "../../../_components/card";
 import {
   Pagination,
   PaginationContent,
@@ -24,18 +25,23 @@ interface Movie {
 const API_KEY = "b191ad205317927c1b95e4ad22c7f87c";
 const BASE_URL = "https://api.themoviedb.org/3";
 
-export default function Home() {
+export default function SimilarMoviesPage() {
+  const params = useParams();
+  const movieId = params?.id;
+
   const [movies, setMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!movieId) return;
+
     const fetchMovies = async () => {
       setLoading(true);
       try {
         const res = await fetch(
-          `${BASE_URL}/movie/popular?language=en-US&page=${page}&api_key=${API_KEY}`,
+          `${BASE_URL}/movie/${movieId}/similar?language=en-US&page=${page}&api_key=${API_KEY}`,
         );
         const data = await res.json();
         setMovies(data.results || []);
@@ -48,7 +54,7 @@ export default function Home() {
       }
     };
     fetchMovies();
-  }, [page]);
+  }, [page, movieId]);
 
   const goToPage = (p: number) => {
     if (p < 1 || p > totalPages) return;
@@ -81,7 +87,7 @@ export default function Home() {
 
       <main className="flex-1 flex flex-col justify-between max-w-[1440px] w-full mx-auto px-6 pt-8 pb-12 gap-10">
         <div className="flex flex-col gap-8">
-          <h1 className="text-3xl font-bold tracking-tight">Popular</h1>
+          <h1 className="text-3xl font-bold tracking-tight">More Like This</h1>
 
           {loading ? (
             <div className="flex justify-center items-center py-20">
@@ -89,6 +95,10 @@ export default function Home() {
                 Loading movies...
               </p>
             </div>
+          ) : movies.length === 0 ? (
+            <p className="text-base text-muted-foreground">
+              No similar movies found.
+            </p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {movies.map((movie) => (

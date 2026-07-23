@@ -21,7 +21,7 @@ interface Movie {
   poster_path: string | null;
 }
 
-const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+const API_KEY = "b191ad205317927c1b95e4ad22c7f87c";
 const BASE_URL = "https://api.themoviedb.org/3";
 
 export default function Home() {
@@ -55,7 +55,6 @@ export default function Home() {
     setPage(p);
   };
 
-  // 1, 2, 3 ... totalPages гэсэн энгийн харагдах хуудасны дугаарууд
   const getPageNumbers = () => {
     const pages: (number | "ellipsis")[] = [];
     const maxVisible = 5;
@@ -77,16 +76,21 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-1 flex flex-col gap-8">
-        <div className="flex w-full max-w-[1440px] mx-auto flex-col gap-[52px] px-6">
-          <p className="text-2xl font-bold">Upcoming</p>
+
+      <main className="flex-1 flex flex-col justify-between max-w-[1440px] w-full mx-auto px-6 pt-8 pb-12 gap-10">
+        <div className="flex flex-col gap-8">
+          <h1 className="text-3xl font-bold tracking-tight">Upcoming</h1>
 
           {loading ? (
-            <p className="text-sm text-gray-500">Loading movies...</p>
+            <div className="flex justify-center items-center py-20">
+              <p className="text-base text-muted-foreground animate-pulse">
+                Loading movies...
+              </p>
+            </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {movies.map((movie) => (
                 <Card key={movie.id} movie={movie} />
               ))}
@@ -94,51 +98,54 @@ export default function Home() {
           )}
         </div>
 
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  goToPage(page - 1);
-                }}
-              />
-            </PaginationItem>
+        <div className="flex justify-end pt-4">
+          <Pagination className="mx-0 w-auto">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    goToPage(page - 1);
+                  }}
+                />
+              </PaginationItem>
 
-            {getPageNumbers().map((p, idx) =>
-              p === "ellipsis" ? (
-                <PaginationItem key={`ellipsis-${idx}`}>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              ) : (
-                <PaginationItem key={p}>
-                  <PaginationLink
-                    href="#"
-                    isActive={p === page}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      goToPage(p);
-                    }}
-                  >
-                    {p}
-                  </PaginationLink>
-                </PaginationItem>
-              ),
-            )}
+              {getPageNumbers().map((p, idx) =>
+                p === "ellipsis" ? (
+                  <PaginationItem key={`ellipsis-${idx}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={p}>
+                    <PaginationLink
+                      href="#"
+                      isActive={p === page}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        goToPage(p);
+                      }}
+                    >
+                      {p}
+                    </PaginationLink>
+                  </PaginationItem>
+                ),
+              )}
 
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  goToPage(page + 1);
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    goToPage(page + 1);
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </main>
+
       <Footer />
     </div>
   );
