@@ -114,7 +114,7 @@ export function Header() {
         <div className="flex-shrink-0">
           <Link href="/">
             <Image
-              src="/header/logo.svg"
+              src="/header/Logo.svg"
               alt="logo"
               width={92}
               height={20}
