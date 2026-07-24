@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Star, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Movie {
   id: number;
@@ -13,14 +20,42 @@ interface Movie {
   backdrop_path: string | null;
 }
 
+interface TmdbVideo {
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+}
+
 const API_KEY = "b191ad205317927c1b95e4ad22c7f87c";
 const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
 const FALLBACK_IMAGE = "/Hero/wicked.svg";
 
+// TMDB-ийн videos жагсаалтаас хамгийн тохирох YouTube трейлерийг сонгоно
+function pickTrailer(videos: TmdbVideo[] | undefined): TmdbVideo | null {
+  if (!videos || videos.length === 0) return null;
+  const youtubeVideos = videos.filter((v) => v.site === "YouTube");
+
+  return (
+    youtubeVideos.find((v) => v.type === "Trailer" && v.official) ||
+    youtubeVideos.find((v) => v.type === "Trailer") ||
+    youtubeVideos.find((v) => v.type === "Teaser") ||
+    youtubeVideos[0] ||
+    null
+  );
+}
+
 export function Hero() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Трейлер (YouTube) state
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [trailerName, setTrailerName] = useState<string | null>(null);
+  const [trailerLoading, setTrailerLoading] = useState(false);
 
   useEffect(() => {
     const fetchNowPlaying = async () => {
@@ -53,6 +88,26 @@ export function Hero() {
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === movies.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleWatchTrailer = async () => {
+    setIsTrailerOpen(true);
+    setTrailerKey(null);
+    setTrailerName(null);
+    setTrailerLoading(true);
+    try {
+      const res = await fetch(
+        `${BASE_URL}/movie/${currentMovie.id}/videos?language=en-US&api_key=${API_KEY}`,
+      );
+      const data = await res.json();
+      const trailer = pickTrailer(data.results);
+      setTrailerKey(trailer?.key ?? null);
+      setTrailerName(trailer?.name ?? null);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setTrailerLoading(false);
+    }
   };
 
   if (movies.length === 0) {
@@ -101,6 +156,7 @@ export function Hero() {
         </p>
 
         <Button
+          onClick={handleWatchTrailer}
           variant="outline"
           className="mt-[8px] rounded-lg bg-transparent border-white text-white hover:bg-white hover:text-black gap-[8px]"
         >
@@ -139,6 +195,38 @@ export function Hero() {
           />
         ))}
       </div>
+
+      <Dialog open={isTrailerOpen} onOpenChange={setIsTrailerOpen}>
+        <DialogContent className="p-0 overflow-hidden !max-w-none w-[997px]">
+          <DialogHeader className="sr-only">
+            <DialogTitle>
+              {trailerName || `${currentMovie.title} Trailer`}
+            </DialogTitle>
+            <DialogDescription>
+              {currentMovie.title} трейлер видео
+            </DialogDescription>
+          </DialogHeader>
+          <div className="w-[997px] h-[561px] flex items-center justify-center bg-black">
+            {trailerLoading && (
+              <p className="text-sm text-gray-300">Loading trailer...</p>
+            )}
+            {!trailerLoading && trailerKey && (
+              <iframe
+                width={997}
+                height={561}
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                title={trailerName || `${currentMovie.title} Trailer`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            )}
+            {!trailerLoading && !trailerKey && (
+              <p className="text-sm text-gray-300">Трейлер олдсонгүй.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

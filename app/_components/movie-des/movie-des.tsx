@@ -32,6 +32,14 @@ interface CastMember {
   name: string;
 }
 
+interface TmdbVideo {
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+}
+
 interface TmdbMovieResponse {
   title: string;
   release_date: string;
@@ -46,6 +54,23 @@ interface TmdbMovieResponse {
     cast: CastMember[];
     crew: CrewMember[];
   };
+  videos?: {
+    results: TmdbVideo[];
+  };
+}
+
+// TMDB-ийн videos жагсаалтаас хамгийн тохирох YouTube трейлерийг сонгоно
+function pickTrailer(videos: TmdbVideo[] | undefined): TmdbVideo | null {
+  if (!videos || videos.length === 0) return null;
+  const youtubeVideos = videos.filter((v) => v.site === "YouTube");
+
+  return (
+    youtubeVideos.find((v) => v.type === "Trailer" && v.official) ||
+    youtubeVideos.find((v) => v.type === "Trailer") ||
+    youtubeVideos.find((v) => v.type === "Teaser") ||
+    youtubeVideos[0] ||
+    null
+  );
 }
 
 export interface MovieData {
@@ -122,19 +147,27 @@ export function MovieDes({ movieId }: MovieDesProps) {
   const [posterSrc, setPosterSrc] = useState<string>(NO_IMAGE_PLACEHOLDER);
   const [heroSrc, setHeroSrc] = useState<string>(NO_IMAGE_PLACEHOLDER);
 
+  // Трейлер (YouTube) state
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [trailerName, setTrailerName] = useState<string | null>(null);
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false);
+
   useEffect(() => {
     const fetchMovie = async () => {
       setLoading(true);
       try {
         const res = await fetch(
-          `${BASE_URL}/movie/${movieId}?language=en-US&append_to_response=credits&api_key=${API_KEY}`,
+          `${BASE_URL}/movie/${movieId}?language=en-US&append_to_response=credits,videos&api_key=${API_KEY}`,
         );
         const data = await res.json();
         const mappedData = mapTmdbToMovieData(data);
+        const trailer = pickTrailer(data.videos?.results);
 
         setMovie(mappedData);
         setPosterSrc(mappedData.posterImage);
         setHeroSrc(mappedData.heroImage);
+        setTrailerKey(trailer?.key ?? null);
+        setTrailerName(trailer?.name ?? null);
       } catch (err) {
         console.error("Fetch error:", err);
       } finally {
@@ -181,28 +214,61 @@ export function MovieDes({ movieId }: MovieDesProps) {
           className="w-[290px] h-[428px] rounded-md object-cover bg-gray-100"
           onError={() => setPosterSrc(NO_IMAGE_PLACEHOLDER)}
         />
-        <Image
-          src={heroSrc}
-          alt={`${movie.title} hero`}
-          width={760}
-          height={428}
-          className="w-[760px] h-[428px] rounded-md object-cover bg-gray-100 relative"
-          onError={() => setHeroSrc(NO_IMAGE_PLACEHOLDER)}
-        />
-      </div>
-      <div className="ml-[500px] absolute z-50 justify-center">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="w-10 h-10 rounded-2xl"
-            >
-              <Play className="w-4 h-4 fill-current ml-0.5" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent showCloseButton={false}></DialogContent>
-        </Dialog>
+        <div className="relative w-[760px] h-[428px]">
+          <Image
+            src={heroSrc}
+            alt={`${movie.title} hero`}
+            width={760}
+            height={428}
+            className="w-[760px] h-[428px] rounded-md object-cover bg-gray-100"
+            onError={() => setHeroSrc(NO_IMAGE_PLACEHOLDER)}
+          />
+
+          {/* dark gradient so the play trailer overlay stays readable */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 rounded-b-md bg-gradient-to-t from-black/70 to-transparent" />
+
+          {trailerKey && (
+            <div className="absolute left-4 bottom-4 flex items-center gap-3">
+              <Dialog open={isTrailerOpen} onOpenChange={setIsTrailerOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-10 h-10 rounded-full bg-white/10 border-white/60 text-white hover:bg-white/20 backdrop-blur-sm"
+                  >
+                    <Play className="w-4 h-4 fill-current ml-0.5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="p-0 overflow-hidden !max-w-none w-[997px]">
+                  <DialogHeader className="sr-only">
+                    <DialogTitle>
+                      {trailerName || `${movie.title} Trailer`}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {movie.title} трейлер видео
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="w-[997px] h-[561px]">
+                    {isTrailerOpen && (
+                      <iframe
+                        width={997}
+                        height={561}
+                        className="w-full h-full"
+                        src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                        title={trailerName || `${movie.title} Trailer`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <span className="text-white text-sm font-medium">
+                Play trailer
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mt-[32px] flex gap-[12px] flex-wrap">
