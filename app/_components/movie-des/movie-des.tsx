@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const API_KEY = "b191ad205317927c1b95e4ad22c7f87c";
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -176,9 +186,23 @@ export function MovieDes({ movieId }: MovieDesProps) {
           alt={`${movie.title} hero`}
           width={760}
           height={428}
-          className="w-[760px] h-[428px] rounded-md object-cover bg-gray-100"
+          className="w-[760px] h-[428px] rounded-md object-cover bg-gray-100 relative"
           onError={() => setHeroSrc(NO_IMAGE_PLACEHOLDER)}
         />
+      </div>
+      <div className="ml-[500px] absolute z-50 justify-center">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-10 h-10 rounded-2xl"
+            >
+              <Play className="w-4 h-4 fill-current ml-0.5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent showCloseButton={false}></DialogContent>
+        </Dialog>
       </div>
 
       <div className="mt-[32px] flex gap-[12px] flex-wrap">

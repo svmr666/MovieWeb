@@ -66,7 +66,6 @@ export function Hero() {
   const currentMovie = movies[currentIndex];
 
   return (
-    // mb-[52px] нэмж доод талаас нь 52px зай авсан
     <div className="relative w-full max-w-[1440px] h-[600px] mx-auto overflow-hidden group mb-[52px]">
       <Image
         src={

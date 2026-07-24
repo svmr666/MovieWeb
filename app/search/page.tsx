@@ -45,12 +45,10 @@ function SearchResultsContent() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
 
-  // Query өөрчлөгдөхөд хуудасны дугаарыг 1 рүү буцаах
   useEffect(() => {
     setPage(1);
   }, [query]);
 
-  // Genre татах
   useEffect(() => {
     const fetchGenres = async () => {
       try {
@@ -67,7 +65,6 @@ function SearchResultsContent() {
     fetchGenres();
   }, []);
 
-  // Кино хайх (Query болон Page өөрчлөгдөх бүрт ажиллана)
   useEffect(() => {
     if (!query) return;
 
@@ -144,7 +141,6 @@ function SearchResultsContent() {
               </div>
             )}
 
-            {/* Pagination хэсэг */}
             {totalPages > 1 && !loading && (
               <div className="flex justify-end pt-4">
                 <Pagination className="mx-0 w-auto">
@@ -195,7 +191,6 @@ function SearchResultsContent() {
             )}
           </div>
 
-          {/* БАРУУН ТАЛ: Genre-ууд */}
           <div className="w-full lg:w-[380px] shrink-0 border-t lg:border-t-0 lg:border-l lg:pl-10 pt-8 lg:pt-0">
             <h2 className="text-xl font-bold mb-1">Search by genre</h2>
             <p className="text-sm text-gray-500 mb-6">
