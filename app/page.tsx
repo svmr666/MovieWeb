@@ -44,11 +44,11 @@ export default function Home() {
       <Header />
       <main className="flex-1 flex flex-col">
         <Hero />
-        <Movielist
+        {/* <Movielist
           upcomingMovies={upcomingMovies}
           popularMovies={popularMovies}
           topRatedMovies={topRatedMovies}
-        />
+        /> */}
       </main>
       <Footer />
     </div>

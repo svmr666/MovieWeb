@@ -124,39 +124,51 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3 justify-center flex-1 max-w-2xl">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-                <span>Genre</span>
-              </Button>
-            </DropdownMenuTrigger>
+          <Image
+            src="/header/Modes.svg"
+            alt="search"
+            width={36}
+            height={36}
+            className="w-[36px] h-[36px] cursor-pointer sm:hidden ml-[200px]"
+          />
+          <div className="max-sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                  <span>Genre</span>
+                </Button>
+              </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-[600px] p-6" align="start">
-              <div className="flex flex-col gap-1 mb-4">
-                <h2 className="text-2xl font-bold">Genres</h2>
-                <p className="text-sm text-gray-500">
-                  See lists of movies by genre
-                </p>
-              </div>
+              <DropdownMenuContent className="w-[600px] p-6" align="start">
+                <div className="flex flex-col gap-1 mb-4">
+                  <h2 className="text-2xl font-bold">Genres</h2>
+                  <p className="text-sm text-gray-500">
+                    See lists of movies by genre
+                  </p>
+                </div>
 
-              <div className="flex flex-wrap gap-2">
-                {genres.map((genre) => (
-                  <Link
-                    key={genre.id}
-                    href={`/genre/${genre.id}?name=${encodeURIComponent(
-                      genre.name,
-                    )}`}
-                    className="flex items-center gap-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    {genre.name}
-                  </Link>
-                ))}
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <div className="flex flex-wrap gap-2">
+                  {genres.map((genre) => (
+                    <Link
+                      key={genre.id}
+                      href={`/genre/${genre.id}?name=${encodeURIComponent(
+                        genre.name,
+                      )}`}
+                      className="flex items-center gap-1 rounded-full border border-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors md:sm:hidden"
+                    >
+                      {genre.name}
+                    </Link>
+                  ))}
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-          <div className="relative  max-w-md w-[379px]" ref={searchRef}>
+          <div
+            className="relative  max-w-md w-[379px] max-sm:hidden"
+            ref={searchRef}
+          >
             <InputGroup className="w-full rounded-lg">
               <InputGroupAddon>
                 <Search className="w-4 h-4 text-gray-500" />
@@ -240,6 +252,15 @@ export function Header() {
         </div>
 
         <div className="w-[92px] hidden md:block"></div>
+        <div>
+          <Image
+            src="/header/Icon-Button.svg"
+            alt="mode"
+            width={36}
+            height={36}
+            className="w-[36px] h-[36px]"
+          />
+        </div>
       </div>
     </header>
   );
