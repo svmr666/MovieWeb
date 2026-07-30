@@ -28,7 +28,6 @@ export const Card = ({ movie }: { movie: any }) => {
       href={movie?.id ? `/movie/${movie.id}` : "#"}
       className="flex flex-col overflow-hidden rounded-lg border border-gray-100 dark:border-gray-800 cursor-pointer group transition-colors"
     >
-      {/* Зургийн хэсэг */}
       <div className="relative w-full aspect-[2/3] overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
         {imageSrc ? (
           <img
@@ -47,7 +46,6 @@ export const Card = ({ movie }: { movie: any }) => {
         )}
       </div>
 
-      {/* Мэдээллийн хэсэг */}
       <div className="flex flex-col gap-1 bg-gray-200 dark:bg-gray-800 p-3 transition-colors">
         <div className="flex items-center gap-1 text-sm text-gray-900 dark:text-white">
           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 shrink-0" />

@@ -182,7 +182,6 @@ export function MovieDes({ movieId }: MovieDesProps) {
 
   return (
     <div className="w-full max-w-[1080px] px-4 md:px-0 mx-auto mt-[20px] md:mt-[52px]">
-      {/* 1. Header: Title & Rating */}
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">{movie.title}</h1>
@@ -256,7 +255,6 @@ export function MovieDes({ movieId }: MovieDesProps) {
           )}
         </div>
 
-        {/* Desktop дээр зүүн талын Постер / Mobile дээр Хэвтээ байршилтай Poster + Details */}
         <div className="flex gap-4 md:gap-0 mt-4 md:mt-0 md:order-1 shrink-0">
           <Image
             src={posterSrc}
@@ -288,7 +286,6 @@ export function MovieDes({ movieId }: MovieDesProps) {
         </div>
       </div>
 
-      {/* 3. Desktop дээр л харагдах Genres & Overview (Mobile дээр Постерын хажууд орсон) */}
       <div className="hidden md:block">
         <div className="mt-[32px] flex gap-[12px] flex-wrap">
           {movie.genres.map((genre) => (
@@ -307,7 +304,6 @@ export function MovieDes({ movieId }: MovieDesProps) {
         </p>
       </div>
 
-      {/* 4. Director, Writers, Stars Хүснэгт */}
       <div className="mt-6 text-xs sm:text-sm md:text-base">
         <div className="flex py-2.5 md:py-3 border-b">
           <div className="w-[90px] md:w-[120px] font-semibold shrink-0">

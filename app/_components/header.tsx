@@ -55,13 +55,12 @@ export function Header() {
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  // Portal нь зөвхөн client дээр document.body байх үед л ажиллах ёстой
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Desktop search-ийн гадна click тогтоох ref
   const searchRef = useRef<HTMLDivElement>(null);
-  // Mobile search-ийн гадна click тогтоох ref (тусдаа!)
+
   const mobileSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,7 +103,6 @@ export function Header() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Desktop болон mobile хоёр search-ийн аль алиных нь гадна click-ийг барина
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -135,10 +133,6 @@ export function Header() {
     router.push(`/search?q=${encodeURIComponent(query.trim())}`);
   };
 
-  // Search results-ийн dropdown-г нэг л газар бичээд, desktop болон mobile
-  // хоёулаа дахин ашиглах function. Ингэснээр код давхардахгүй.
-  // 🌗 Бүх өнгийг theme-aware (bg-background / text-foreground / muted-foreground)
-  // болгосон тул dark mode-д ч зөв харагдана.
   const renderSearchDropdown = () => {
     if (!isOpen) return null;
 
@@ -213,10 +207,6 @@ export function Header() {
     );
   };
 
-  // Mobile menu-ийн JSX-ийг тусад нь бэлдэж аваад, доор нь Portal-оор
-  // document.body руу шууд оруулна (function component биш, зүгээр JSX хувьсагч)
-  // 🌗 bg-white -> bg-background, gray-* -> muted-foreground/border болгож
-  // dark mode-д genre-үүд харагдахгүй байсан асуудлыг засав
   const mobileMenuOverlay =
     showMobileMenu && mounted
       ? createPortal(
@@ -250,7 +240,6 @@ export function Header() {
               </button>
             </div>
 
-            {/* Доод хэсэг: Genres толгой, тайлбар, жагсаалт */}
             <div className="flex-1 overflow-y-auto px-4 py-5 bg-background">
               <h2 className="text-2xl font-bold mb-1 text-foreground">
                 Genres
@@ -297,8 +286,6 @@ export function Header() {
             </Link>
           </div>
 
-          {/* 🌗 Responsive засвар: hardcode ml-[200px] hack-ийг арилгаж,
-              flex/justify ашиглан mobile дээр icon зөв төвд харагдана */}
           <div className="flex items-center gap-3 justify-end sm:justify-center flex-1 max-w-2xl">
             <Image
               src="/header/Modes.svg"
@@ -309,7 +296,6 @@ export function Header() {
               onClick={() => setShowMobileMenu((prev) => !prev)}
             />
 
-            {/* ------- DESKTOP: Genre dropdown ------- */}
             <div className="max-sm:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -349,7 +335,6 @@ export function Header() {
               </DropdownMenu>
             </div>
 
-            {/* ------- DESKTOP: Search input ------- */}
             <div
               className="relative max-w-md w-full sm:w-[379px] max-sm:hidden"
               ref={searchRef}
