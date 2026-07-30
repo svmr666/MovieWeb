@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play } from "lucide-react";
+import { Play, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
 import Image from "next/image";
 import {
   Dialog,
@@ -20,7 +19,6 @@ const BASE_URL = "https://api.themoviedb.org/3";
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/original";
 const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
-// Нийтлэг "Зураг олдсонгүй" SVG placeholder (Inline Data URI)
 const NO_IMAGE_PLACEHOLDER = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="500" height="750" viewBox="0 0 500 750" fill="%23f3f4f6"><rect width="100%" height="100%" fill="%23e5e7eb"/><g transform="translate(175, 275)" stroke="%239ca3af" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="0" y="0" width="150" height="150" rx="12"/><circle cx="45" cy="45" r="15"/><path d="m150 105-40-40-70 70"/></g><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="600" fill="%236b7280">Image Not Found</text></svg>`;
 
 interface CrewMember {
@@ -59,7 +57,6 @@ interface TmdbMovieResponse {
   };
 }
 
-// TMDB-ийн videos жагсаалтаас хамгийн тохирох YouTube трейлерийг сонгоно
 function pickTrailer(videos: TmdbVideo[] | undefined): TmdbVideo | null {
   if (!videos || videos.length === 0) return null;
   const youtubeVideos = videos.filter((v) => v.site === "YouTube");
@@ -143,11 +140,9 @@ export function MovieDes({ movieId }: MovieDesProps) {
   const [movie, setMovie] = useState<MovieData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Зураг ачаалахад алдаа гаргах үеийн state
   const [posterSrc, setPosterSrc] = useState<string>(NO_IMAGE_PLACEHOLDER);
   const [heroSrc, setHeroSrc] = useState<string>(NO_IMAGE_PLACEHOLDER);
 
-  // Трейлер (YouTube) state
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [trailerName, setTrailerName] = useState<string | null>(null);
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
@@ -179,53 +174,46 @@ export function MovieDes({ movieId }: MovieDesProps) {
 
   if (loading || !movie) {
     return (
-      <div className="w-[1080px] mx-auto mt-[52px]">
+      <div className="w-full max-w-[1080px] mx-auto px-4 md:px-0 mt-[52px]">
         <p className="text-sm text-gray-500">Loading movie details...</p>
       </div>
     );
   }
 
   return (
-    <div className="w-[1080px] mx-auto mt-[52px]">
+    <div className="w-full max-w-[1080px] px-4 md:px-0 mx-auto mt-[20px] md:mt-[52px]">
+      {/* 1. Header: Title & Rating */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">{movie.title}</h1>
-          <div className="text-gray-500 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold">{movie.title}</h1>
+          <div className="text-xs md:text-sm text-gray-500 mt-1">
             {movie.releaseDate} · {movie.ageRating} · {movie.duration}
           </div>
         </div>
         <div className="text-right">
-          <div className="text-sm text-gray-500">Rating</div>
+          <div className="hidden md:block text-sm text-gray-500">Rating</div>
           <div className="flex items-center gap-1 justify-end">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-bold">{movie.rating.toFixed(1)}</span>
-            <span className="text-gray-400 text-sm">/10</span>
+            <Star className="w-4 h-4 md:w-5 md:h-5 fill-yellow-400 text-yellow-400" />
+            <span className="font-bold text-base md:text-lg">
+              {movie.rating.toFixed(1)}
+            </span>
+            <span className="text-gray-400 text-xs md:text-sm">/10</span>
           </div>
           <div className="text-xs text-gray-400">{movie.ratingCount}</div>
         </div>
       </div>
 
-      <div className="flex gap-[32px] mt-6">
-        <Image
-          src={posterSrc}
-          alt={movie.title}
-          width={290}
-          height={428}
-          className="w-[290px] h-[428px] rounded-md object-cover bg-gray-100"
-          onError={() => setPosterSrc(NO_IMAGE_PLACEHOLDER)}
-        />
-        <div className="relative w-[760px] h-[428px]">
+      <div className="mt-4 md:mt-6 flex flex-col md:flex-row md:gap-[32px]">
+        <div className="relative w-full aspect-video md:w-[760px] md:h-[428px] md:aspect-auto md:order-2 shrink-0 rounded-md overflow-hidden bg-gray-100">
           <Image
             src={heroSrc}
             alt={`${movie.title} hero`}
-            width={760}
-            height={428}
-            className="w-[760px] h-[428px] rounded-md object-cover bg-gray-100"
+            fill
+            className="object-cover"
             onError={() => setHeroSrc(NO_IMAGE_PLACEHOLDER)}
           />
 
-          {/* dark gradient so the play trailer overlay stays readable */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 rounded-b-md bg-gradient-to-t from-black/70 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
 
           {trailerKey && (
             <div className="absolute left-4 bottom-4 flex items-center gap-3">
@@ -234,12 +222,12 @@ export function MovieDes({ movieId }: MovieDesProps) {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="w-10 h-10 rounded-full bg-white/10 border-white/60 text-white hover:bg-white/20 backdrop-blur-sm"
+                    className="w-10 h-10 rounded-full bg-white/20 border-white/60 text-white hover:bg-white/30 backdrop-blur-md"
                   >
                     <Play className="w-4 h-4 fill-current ml-0.5" />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="p-0 overflow-hidden !max-w-none w-[997px]">
+                <DialogContent className="p-0 overflow-hidden w-[95vw] md:w-[997px] md:h-[561px] aspect-video bg-black border-none !max-w-[997px]">
                   <DialogHeader className="sr-only">
                     <DialogTitle>
                       {trailerName || `${movie.title} Trailer`}
@@ -248,12 +236,10 @@ export function MovieDes({ movieId }: MovieDesProps) {
                       {movie.title} трейлер видео
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="w-[997px] h-[561px]">
+                  <div className="w-full h-full">
                     {isTrailerOpen && (
                       <iframe
-                        width={997}
-                        height={561}
-                        className="w-full h-full"
+                        className="w-full h-full border-0"
                         src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
                         title={trailerName || `${movie.title} Trailer`}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -269,27 +255,72 @@ export function MovieDes({ movieId }: MovieDesProps) {
             </div>
           )}
         </div>
+
+        {/* Desktop дээр зүүн талын Постер / Mobile дээр Хэвтээ байршилтай Poster + Details */}
+        <div className="flex gap-4 md:gap-0 mt-4 md:mt-0 md:order-1 shrink-0">
+          <Image
+            src={posterSrc}
+            alt={movie.title}
+            width={290}
+            height={428}
+            className="w-[100px] h-[150px] sm:w-[140px] sm:h-[210px] md:w-[290px] md:h-[428px] rounded-md object-cover bg-gray-100 shrink-0"
+            onError={() => setPosterSrc(NO_IMAGE_PLACEHOLDER)}
+          />
+
+          {/* Mobile дээр Poster-ын баруун талд харагдах Genres & Description */}
+          <div className="flex flex-col md:hidden flex-1">
+            <div className="flex gap-1.5 flex-wrap">
+              {movie.genres.map((genre) => (
+                <Badge
+                  key={genre}
+                  variant="outline"
+                  className="text-xs px-2 py-0.5 rounded-full"
+                >
+                  {genre}
+                </Badge>
+              ))}
+            </div>
+
+            <p className="mt-2 text-xs text-gray-700 leading-relaxed line-clamp-6">
+              {movie.description}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-[32px] flex gap-[12px] flex-wrap">
-        {movie.genres.map((genre) => (
-          <Badge key={genre} variant="outline">
-            {genre}
-          </Badge>
-        ))}
-      </div>
-
-      <p className="mt-6 text-gray-700 leading-relaxed">{movie.description}</p>
-
-      <div className="mt-6">
-        <div className="flex py-3 border-b">
-          <div className="w-[120px] font-semibold shrink-0">Director</div>
-          <div>{movie.director}</div>
+      {/* 3. Desktop дээр л харагдах Genres & Overview (Mobile дээр Постерын хажууд орсон) */}
+      <div className="hidden md:block">
+        <div className="mt-[32px] flex gap-[12px] flex-wrap">
+          {movie.genres.map((genre) => (
+            <Badge
+              key={genre}
+              variant="outline"
+              className="rounded-full px-3 py-1"
+            >
+              {genre}
+            </Badge>
+          ))}
         </div>
 
-        <div className="flex py-3 border-b">
-          <div className="w-[120px] font-semibold shrink-0">Writers</div>
-          <div>
+        <p className="mt-6 text-gray-700 leading-relaxed">
+          {movie.description}
+        </p>
+      </div>
+
+      {/* 4. Director, Writers, Stars Хүснэгт */}
+      <div className="mt-6 text-xs sm:text-sm md:text-base">
+        <div className="flex py-2.5 md:py-3 border-b">
+          <div className="w-[90px] md:w-[120px] font-semibold shrink-0">
+            Director
+          </div>
+          <div className="text-gray-800">{movie.director}</div>
+        </div>
+
+        <div className="flex py-2.5 md:py-3 border-b">
+          <div className="w-[90px] md:w-[120px] font-semibold shrink-0">
+            Writers
+          </div>
+          <div className="text-gray-800">
             {movie.writers.map((writer, i) => (
               <span key={writer}>
                 {writer}
@@ -299,9 +330,11 @@ export function MovieDes({ movieId }: MovieDesProps) {
           </div>
         </div>
 
-        <div className="flex py-3 border-b">
-          <div className="w-[120px] font-semibold shrink-0">Stars</div>
-          <div>
+        <div className="flex py-2.5 md:py-3 border-b">
+          <div className="w-[90px] md:w-[120px] font-semibold shrink-0">
+            Stars
+          </div>
+          <div className="text-gray-800">
             {movie.stars.map((star, i) => (
               <span key={star}>
                 {star}
